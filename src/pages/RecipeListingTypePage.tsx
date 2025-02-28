@@ -2,14 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Heart } from "lucide-react";
+import { useSelector } from 'react-redux';
+import { RootState } from '../app/store';
 import axios from 'axios';
 
 const RecipeListingPage = () => {
 
-  const [likedRecipes, setLikedRecipes] = useState<number[]>([]);
+  const [likedRecipes, setLikedRecipes] = useState<any[]>([]);
   const [foods, setFoods] = useState([]);
 
   const { type } = useParams();
+
+  // Get user state from Redux
+  const user = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     const getFoods = async () => {
@@ -17,17 +22,42 @@ const RecipeListingPage = () => {
         const response = await axios.get(`http://localhost:5000/api/foodtype/${type}`);
         setFoods(response.data);
       } catch (error) {
-        console.error("Error fetching random foods:", error);
+        console.error("Error fetching foods:", error);
+      }
+    };
+
+    const getUserLikes = async () => {
+      if (!user.id) return; // ถ้า user ยังไม่ได้ล็อกอิน ไม่ต้องโหลด Like
+      try {
+        const response = await axios.get(`http://localhost:5000/api/like/${user.id}/`);
+
+        setLikedRecipes(response.data.likedRecipes); // 🔥 ตั้งค่า state ด้วย ID ที่เคยกด Like
+      } catch (error) {
+        console.error("Error fetching user likes:", error);
       }
     };
 
     getFoods();
-  }, []);
+    getUserLikes();
+  }, [type, user.id]);
 
-  const toggleLike = (id: number) => {
-    setLikedRecipes((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const toggleLike = async (recipeId: string) => {
+    const userId = user.id
+    try {
+      const response = await axios.post("http://localhost:5000/api/like", {
+        userId,
+        targetId: recipeId,
+        targetType: "Food"
+      });
+
+      if (response.data.liked) {
+        setLikedRecipes([...likedRecipes, recipeId]);
+      } else {
+        setLikedRecipes(likedRecipes.filter(id => id !== recipeId));
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
   };
 
   return (
@@ -45,14 +75,16 @@ const RecipeListingPage = () => {
                 <h3 className="text-lg font-semibold mb-1">{recipe.name}</h3>
               </Link>
               <div className="text-gray-600 text-sm mb-2 h-10 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
-                  {recipe.description}
+                {recipe.description}
               </div>
               <div className="flex justify-between items-center">
                 {/* <p className="text-yellow-500 font-bold">⭐ {recipe.rating}</p> */}
                 <p className="text-yellow-500 font-bold">⭐ 0</p>
-                <button onClick={() => toggleLike(recipe.id)} className={likedRecipes.includes(recipe._id) ? "text-red-700" : "text-red-500 hover:text-red-700"}>
+                <button onClick={() => toggleLike(recipe._id)}
+                  className={likedRecipes.includes(recipe._id) ? "text-red-700" : "text-red-500 hover:text-red-700"}>
                   <Heart size={20} fill={likedRecipes.includes(recipe._id) ? "currentColor" : "none"} />
                 </button>
+
               </div>
             </div>
           ))}
