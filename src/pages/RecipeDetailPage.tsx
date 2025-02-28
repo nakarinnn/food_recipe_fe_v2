@@ -19,13 +19,11 @@ const RecipeDetailPage = () => {
 
     useEffect(() => {
         const getFoods = async () => {
-            console.log('id:', id)
             try {
                 const response = await axios.get(`http://localhost:5000/api//food/${id}`);
                 setFoods(response.data);
                 setIngredients(response.data.ingredients)
                 setInstructions(response.data.instructions)
-                console.log('response.data: ', response.data)
             } catch (error) {
                 console.error("Error fetching random foods:", error);
             }

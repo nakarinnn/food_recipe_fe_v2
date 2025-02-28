@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Heart } from "lucide-react";
 import axios from 'axios';
@@ -9,10 +9,12 @@ const RecipeListingPage = () => {
   const [likedRecipes, setLikedRecipes] = useState<number[]>([]);
   const [foods, setFoods] = useState([]);
 
+  const { type } = useParams();
+
   useEffect(() => {
     const getFoods = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/food-random");
+        const response = await axios.get(`http://localhost:5000/api/foodtype/${type}`);
         setFoods(response.data);
       } catch (error) {
         console.error("Error fetching random foods:", error);
