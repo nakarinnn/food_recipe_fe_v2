@@ -20,7 +20,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ isOpen, onClose, onRegister }) 
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://localhost:5000/api/login", {
+            const response = await axios.post("http://localhost:5000/api/user/login", {
                 email,
                 password,
             },

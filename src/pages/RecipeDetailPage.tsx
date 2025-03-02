@@ -3,24 +3,82 @@ import { Heart } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../app/store';
+
+interface Ingredient {
+    _id: string;
+    name: string;
+    amount: string;
+    unit: string;
+}
+
+interface Instruction {
+    _id: string;
+    step: number;
+    description: string;
+}
 
 const RecipeDetailPage = () => {
-    const [liked, setLiked] = useState(false);
-    const [comments, setComments] = useState<string[]>([]);
+    const [comments, setComments] = useState<any[]>([]);
     const [newComment, setNewComment] = useState('');
-    const [userRating, setUserRating] = useState<number>(0);  // เพิ่มสถานะสำหรับคะแนนจากผู้ใช้
-    const [averageRating, setAverageRating] = useState<number>(4.5);  // ค่าคะแนนเฉลี่ยเริ่มต้น
+    const [userRating, setUserRating] = useState<number>(0);
+    const [averageRating, setAverageRating] = useState<number>(0);
+    const user = useSelector((state: RootState) => state.user);
 
     const { id } = useParams();
 
     const [foods, setFoods] = useState<any>([]);
-    const [ingredients, setIngredients] = useState<any>([]);
-    const [instructions, setInstructions] = useState<any>([]);
+    const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+    const [instructions, setInstructions] = useState<Instruction[]>([]);
+
+    const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
+
+    const [editCommentId, setEditCommentId] = useState(null);
+    const [editText, setEditText] = useState("");
+
+    const handleEdit = (comment: any) => {
+        setEditCommentId(comment._id);
+        setEditText(comment.text);
+    };
+
+    const handleSave = async (commentId: string) => {
+        if (editText.trim() !== "") {
+            try {
+                await axios.put(`http://localhost:5000/api/comment/${commentId}`, { text: editText });
+                setComments((prev) =>
+                    prev.map((comment) => (comment._id === commentId ? { ...comment, text: editText } : comment))
+                );
+            } catch (error) {
+                console.error("Error updating comment:", error);
+            }
+        }
+        setEditCommentId(null);
+    };
+
+    const handleDelete = async (commentId: string) => {
+        if (window.confirm("คุณต้องการลบความคิดเห็นนี้ใช่หรือไม่?")) {
+            try {
+                await axios.delete(`http://localhost:5000/api/comment/${commentId}`);
+                setComments((prev) => prev.filter((comment) => comment._id !== commentId));
+            } catch (error) {
+                console.error("Error deleting comment:", error);
+            }
+        }
+    };
+    const getComments = async () => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/comment/${id}`);
+            setComments(response.data);
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+        }
+    };
 
     useEffect(() => {
         const getFoods = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api//food/${id}`);
+                const response = await axios.get(`http://localhost:5000/api/food/${id}`);
                 setFoods(response.data);
                 setIngredients(response.data.ingredients)
                 setInstructions(response.data.instructions)
@@ -29,27 +87,112 @@ const RecipeDetailPage = () => {
             }
         };
 
-        getFoods();
-    }, []);
+        const getUserLikes = async () => {
+            if (!user.id) return;
+            try {
+                const response = await axios.get(`http://localhost:5000/api/like/${user.id}/`);
 
-    const handleLike = () => {
-        setLiked((prev) => !prev);
-    };
+                setLikedRecipes(response.data.likedRecipes);
+            } catch (error) {
+                console.error("Error fetching user likes:", error);
+            }
+        };
+
+        const getUserRating = async () => {
+            if (!user.id) return;
+            try {
+                const response = await axios.post(`http://localhost:5000/api/rating/get-rating`, {
+                    foodId: id,
+                    userId: user.id
+                });
+
+                if (response.data)
+                    setUserRating(response.data.rating)
+                else
+                    setUserRating(0)
+
+            } catch (error) {
+                console.error("Error fetching user rating:", error);
+            }
+        };
+
+        getFoods();
+        getUserLikes();
+        getUserRating();
+        getComments();
+    }, [user.id]);
+
+    useEffect(() => {
+        const getAverageRating = async () => {
+            try {
+                const response = await axios.post(`http://localhost:5000/api/rating/average-rating`, {
+                    foodId: id,
+                });
+                setAverageRating(response.data)
+            } catch (error) {
+                console.error("Error fetching user rating:", error);
+            }
+        };
+
+        getAverageRating()
+    }, [userRating]);
+
 
     const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewComment(e.target.value);
     };
 
-    const handleAddComment = () => {
-        if (newComment.trim()) {
-            setComments((prev) => [...prev, newComment]);
-            setNewComment('');
+    const toggleLike = async (recipeId: string) => {
+        const userId = user.id
+        try {
+            const response = await axios.post("http://localhost:5000/api/like", {
+                userId,
+                targetId: recipeId,
+                targetType: "Food"
+            });
+
+            if (response.data.liked) {
+                setLikedRecipes([...likedRecipes, recipeId]);
+            } else {
+                setLikedRecipes(likedRecipes.filter(id => id !== recipeId));
+            }
+        } catch (error) {
+            console.error("Error toggling like:", error);
         }
     };
 
-    const handleRatingChange = (rating: number) => {
-        setUserRating(rating);
-        setAverageRating((prev) => (prev + rating) / 2);  // คำนวณคะแนนเฉลี่ยใหม่
+    const handleAddComment = async () => {
+        setNewComment("");
+        const userId = user.id;
+        try {
+            await axios.post("http://localhost:5000/api/comment", {
+                userId,
+                foodId: id,
+                text: newComment
+            });
+
+            getComments();
+
+        } catch (error) {
+            console.error("Error to add comment:", error);
+        }
+    };
+
+    const handleRatingChange = async (rating: number) => {
+        try {
+            const response = await axios.post("http://localhost:5000/api/rating", {
+                foodId: foods._id,
+                userId: user.id,
+                rating,
+            });
+
+            setUserRating(response.data.newRating.rating)
+            getComments();
+
+        } catch (error) {
+            console.error("An error occurred while rating:", error);
+        }
+
     };
 
     return (
@@ -62,8 +205,8 @@ const RecipeDetailPage = () => {
                     <p className="text-gray-600 text-lg mb-4">{foods.description}</p>
                     <div className="flex justify-between items-center w-full mb-4">
                         <span className="text-yellow-500 font-bold text-xl">⭐ {averageRating.toFixed(1)}</span>
-                        <button onClick={handleLike} className={liked ? 'text-red-700' : 'text-red-500 hover:text-red-700'}>
-                            <Heart size={24} fill={liked ? 'currentColor' : 'none'} />
+                        <button onClick={() => toggleLike(foods._id)} className={likedRecipes.includes(foods._id) ? "text-red-700" : "text-red-500 hover:text-red-700"}>
+                            <Heart size={20} fill={likedRecipes.includes(foods._id) ? "currentColor" : "none"} />
                         </button>
                     </div>
 
@@ -122,9 +265,79 @@ const RecipeDetailPage = () => {
                         {comments.length === 0 ? (
                             <p className="text-gray-500 text-lg">ยังไม่มีความคิดเห็น</p>
                         ) : (
-                            comments.map((comment, index) => (
-                                <div key={index} className="bg-gray-100 p-4 rounded-lg shadow-md">
-                                    <p className="text-gray-700 text-lg">{comment}</p>
+                            comments.map((comment) => (
+                                <div key={comment._id} className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+                                    <div className="flex items-start gap-4">
+                                        {/* Avatar */}
+                                        <img
+                                            src={comment.userId.avatar_url}
+                                            alt={comment.userId.name}
+                                            className="w-10 h-10 rounded-full border border-gray-300"
+                                        />
+                                        {/* Content */}
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between w-full">
+                                                {/* Left: Name & Email */}
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-medium text-gray-800">{comment.userId.name}</p>
+                                                    <span className="text-sm text-gray-500">{comment.userId.email}</span>
+                                                </div>
+                                                {/* Right: Created Time */}
+                                                <span className="text-sm text-gray-400">
+                                                    {new Date(comment.createdAt).toLocaleString()}
+                                                </span>
+                                            </div>
+
+                                            {/* Edit Mode */}
+                                            {user.id === comment.userId._id ? (
+                                                editCommentId === comment._id ? (
+                                                    <div className="mt-2">
+                                                        <textarea
+                                                            className="w-full p-2 border rounded-lg"
+                                                            value={editText}
+                                                            onChange={(e) => setEditText(e.target.value)}
+                                                        />
+                                                        <div className="flex justify-end gap-2 mt-2">
+                                                            <button
+                                                                onClick={() => handleSave(comment._id)}
+                                                                className="px-3 py-1 bg-blue-500 text-white rounded-lg"
+                                                            >
+                                                                บันทึก
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditCommentId(null)}
+                                                                className="px-3 py-1 bg-gray-300 rounded-lg"
+                                                            >
+                                                                ยกเลิก
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-gray-700 mt-1 text-base">{comment.text}</p>
+                                                        <div className="flex justify-end gap-2 mt-2">
+                                                            <button
+                                                                onClick={() => handleEdit(comment)}
+                                                                className="text-blue-500 text-sm"
+                                                            >
+                                                                แก้ไข
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(comment._id)}
+                                                                className="text-red-500 text-sm"
+                                                            >
+                                                                ลบ
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )
+                                            ) : (
+                                                <>
+                                                    <p className="text-gray-700 mt-1 text-base">{comment.text}</p>
+                                                </>)
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
                             ))
                         )}

@@ -8,9 +8,9 @@ import axios from 'axios';
 
 const RecipeListingPage = () => {
 
-  const [likedRecipes, setLikedRecipes] = useState<any[]>([]);
-  const [foods, setFoods] = useState([]);
-
+  const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
+  const [foods, setFoods] = useState<any>([]);
+  const [foodWithAverageRating, setFoodWithAverageRating] = useState<any>([]);
   const { type } = useParams();
 
   // Get user state from Redux
@@ -19,8 +19,9 @@ const RecipeListingPage = () => {
   useEffect(() => {
     const getFoods = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/foodtype/${type}`);
+        const response = await axios.get(`http://localhost:5000/api/food/foodtype/${type}`);
         setFoods(response.data);
+
       } catch (error) {
         console.error("Error fetching foods:", error);
       }
@@ -40,6 +41,28 @@ const RecipeListingPage = () => {
     getFoods();
     getUserLikes();
   }, [type, user.id]);
+
+  const calculateAverageRatings = async (foodList: any) => {
+    const updatedFoods = await Promise.all(
+      foodList.map(async (food: { _id: any; }) => {
+        try {
+          const response = await axios.post(`http://localhost:5000/api/rating/average-rating`, {
+            foodId: food._id,
+          });
+          return { ...food, averageRating: response.data };
+        } catch (error) {
+          console.error(`Error fetching average rating for ${food._id}:`, error);
+          return { ...food, averageRating: 0 };
+        }
+      })
+    );
+
+    setFoodWithAverageRating(updatedFoods)
+  };
+
+  useEffect(() => {
+    calculateAverageRatings(foods);
+  }, [foods]);
 
   const toggleLike = async (recipeId: string) => {
     const userId = user.id
@@ -66,7 +89,7 @@ const RecipeListingPage = () => {
       <div className="p-6 mx-auto max-w-6xl">
         <h2 className="text-2xl font-bold mb-4">รายการอาหาร</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {foods.map((recipe: any) => (
+          {foodWithAverageRating.map((recipe: any) => (
             <div key={recipe._id} className="border p-4 rounded-lg shadow-md bg-white">
               <Link to={`/recipe/${recipe._id}`}>
                 <img src={recipe.image} alt={recipe.name} className="w-full h-40 object-cover rounded-lg mb-2" />
@@ -79,7 +102,7 @@ const RecipeListingPage = () => {
               </div>
               <div className="flex justify-between items-center">
                 {/* <p className="text-yellow-500 font-bold">⭐ {recipe.rating}</p> */}
-                <p className="text-yellow-500 font-bold">⭐ 0</p>
+                <p className="text-yellow-500 font-bold">⭐ {recipe.averageRating.toFixed(1)}</p>
                 <button onClick={() => toggleLike(recipe._id)}
                   className={likedRecipes.includes(recipe._id) ? "text-red-700" : "text-red-500 hover:text-red-700"}>
                   <Heart size={20} fill={likedRecipes.includes(recipe._id) ? "currentColor" : "none"} />

@@ -45,7 +45,7 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
     )}&background=random&color=fff`;
 
     try {
-      await axios.post(`http://localhost:5000/api/register`, {
+      await axios.post(`http://localhost:5000/api/user/register`, {
         name,
         email,
         password,
