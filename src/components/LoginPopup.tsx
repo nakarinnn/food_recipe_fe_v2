@@ -16,6 +16,12 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ isOpen, onClose, onRegister }) 
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+    const handleRegister = () => {
+        setEmail('')
+        setPassword('')
+        setError('')
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -44,8 +50,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ isOpen, onClose, onRegister }) 
 
             onClose();
         } catch (err: any) {
-            console.error(err);
-            setError("เกิดข้อผิดพลาดในการเข้าสู่ระบบ โปรดลองใหม่");
+            setError(err.response.data.message);
         }
     };
 
@@ -94,7 +99,11 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ isOpen, onClose, onRegister }) 
                         <p className="text-sm text-gray-600">
                             ยังไม่มีบัญชี?
                             <button
-                                onClick={onRegister}
+                                onClick={() => {
+                                    onRegister();
+                                    onClose();
+                                    handleRegister();
+                                }}
                                 className="text-blue-600 hover:underline ml-1"
                             >
                                 ลงทะเบียน

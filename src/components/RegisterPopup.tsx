@@ -30,6 +30,18 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
     });
   };
 
+  const handleLogin = () => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+
+    setError('')
+
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(""); // Clear previous errors
@@ -63,8 +75,7 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
       onLogin();
       onClose();
     } catch (err: any) {
-      console.error(err);
-      setError("Registration failed. Please try again.");
+      setError(err.response.data.message);
     }
   };
 
@@ -141,7 +152,11 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
           <p className="text-sm text-gray-600">
             มีบัญชีแล้ว?
             <button
-              onClick={onLogin}
+              onClick={() => {
+                onLogin();
+                onClose();
+                handleLogin();
+              }}
               className="text-blue-600 hover:underline ml-1"
             >
               เข้าสู่ระบบ

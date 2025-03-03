@@ -6,19 +6,23 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../app/store';
 import { clearUser } from '../features/user/userSlice';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Get user state from Redux
   const user = useSelector((state: RootState) => state.user);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Search Query:", searchQuery);
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${searchQuery}`); // เปลี่ยนเส้นทางไปยังหน้า Search พร้อมคำค้นหา
+    }
   };
 
   const handleLogout = () => {
@@ -78,12 +82,23 @@ const Navbar = () => {
                 {/* change to button */}
                 <MenuItem>
                   {({ active }) => (
+                    <Link
+                      to="/myList"  // เปลี่ยนเป็นเส้นทางที่ต้องการ
+                      className={`${active && 'bg-gray-100'} block w-full px-4 py-2 text-left text-sm text-gray-700 focus:outline-none`}
+                    >
+                      รายการอาหารที่ชอบ
+                    </Link>
+                  )}
+                </MenuItem>
+                <MenuItem>
+                  {({ active }) => (
                     <button
                       onClick={handleLogout}
                       className={`${active && 'bg-gray-100'} block w-full px-4 py-2 text-left text-sm text-gray-700 focus:outline-none`}
                     >
-                      Sign out
+                      ออกจากระบบ
                     </button>
+
                   )}
                 </MenuItem>
               </MenuItems>
@@ -93,7 +108,7 @@ const Navbar = () => {
               onClick={() => setIsLoginOpen(true)}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer"
             >
-              Login
+              เข้าสู่ระบบ
             </button>
           )}
         </div>
