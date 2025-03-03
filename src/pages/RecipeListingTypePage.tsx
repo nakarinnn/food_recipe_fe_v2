@@ -19,7 +19,7 @@ const RecipeListingPage = () => {
   useEffect(() => {
     const getFoods = async () => {
       try {
-        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/food/foodtype/${type}`);
+        const response = await axios.get(import.meta.env.VITE_BASE_URL+"/api/food/foodtype/"+`${type}`);
         setFoods(response.data);
 
       } catch (error) {
