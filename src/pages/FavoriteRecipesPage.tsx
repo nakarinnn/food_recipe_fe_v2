@@ -17,7 +17,7 @@ const FavoriteMenuList: React.FC = () => {
   useEffect(() => {
     const getFavoriteMenu = async () => {
       try {
-        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/favoriteMenu/${user.id}`);
+        const response = await axios.get(`/api/like/favoriteMenu/${user.id}`);
 
         setFavoriteMenus(response.data)
 
@@ -29,7 +29,7 @@ const FavoriteMenuList: React.FC = () => {
     const getUserLikes = async () => {
       if (!user.id) return; // ถ้า user ยังไม่ได้ล็อกอิน ไม่ต้องโหลด Like
       try {
-        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/${user.id}/`);
+        const response = await axios.get(`/api/like/${user.id}/`);
         setLikedRecipes(response.data.likedRecipes);
       } catch (error) {
         console.error("Error fetching user likes:", error);
@@ -43,7 +43,7 @@ const FavoriteMenuList: React.FC = () => {
   const toggleLike = async (recipeId: string) => {
     const userId = user.id;
     try {
-      const response = await axios.post(import.meta.env.VITE_BASE_URL+"/api/like", {
+      const response = await axios.post("/api/like", {
         userId,
         targetId: recipeId,
         targetType: "Food",

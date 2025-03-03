@@ -20,7 +20,7 @@ const SearchPage = () => {
   useEffect(() => {
     const getFoods = async () => {
       try {
-        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/food/search/${query}`);
+        const response = await axios.get(`/api/food/search/${query}`);
         setFoods(response.data);
 
       } catch (error) {
@@ -31,7 +31,7 @@ const SearchPage = () => {
     const getUserLikes = async () => {
       if (!user.id) return; // ถ้า user ยังไม่ได้ล็อกอิน ไม่ต้องโหลด Like
       try {
-        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/${user.id}/`);
+        const response = await axios.get(`/api/like/${user.id}`);
 
         setLikedRecipes(response.data.likedRecipes); // 🔥 ตั้งค่า state ด้วย ID ที่เคยกด Like
       } catch (error) {
@@ -47,7 +47,7 @@ const SearchPage = () => {
     const updatedFoods = await Promise.all(
       foodList.map(async (food: { _id: any; }) => {
         try {
-          const response = await axios.post(import.meta.env.VITE_BASE_URL+`/api/rating/average-rating`, {
+          const response = await axios.post(`/api/rating/average-rating`, {
             foodId: food._id,
           });
           return { ...food, averageRating: response.data };
@@ -68,7 +68,7 @@ const SearchPage = () => {
   const toggleLike = async (recipeId: string) => {
     const userId = user.id
     try {
-      const response = await axios.post(import.meta.env.VITE_BASE_URL+"/api/like", {
+      const response = await axios.post("/api/like", {
         userId,
         targetId: recipeId,
         targetType: "Food"
