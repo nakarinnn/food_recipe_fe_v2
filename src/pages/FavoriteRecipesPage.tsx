@@ -7,13 +7,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../app/store';
 import { Link } from 'react-router-dom';
 
-type MenuItem = {
-  id: number;
-  name: string;
-  description: string;
-  image: string; // เพิ่มฟิลด์นี้เพื่อเก็บ URL ของรูปภาพ
-};
-
 const FavoriteMenuList: React.FC = () => {
 
   const user = useSelector((state: RootState) => state.user);
@@ -24,9 +17,7 @@ const FavoriteMenuList: React.FC = () => {
   useEffect(() => {
     const getFavoriteMenu = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/like/favoriteMenu/${user.id}`);
-
-        console.log(response.data)
+        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/favoriteMenu/${user.id}`);
 
         setFavoriteMenus(response.data)
 
@@ -38,7 +29,7 @@ const FavoriteMenuList: React.FC = () => {
     const getUserLikes = async () => {
       if (!user.id) return; // ถ้า user ยังไม่ได้ล็อกอิน ไม่ต้องโหลด Like
       try {
-        const response = await axios.get(`http://localhost:5000/api/like/${user.id}/`);
+        const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/${user.id}/`);
         setLikedRecipes(response.data.likedRecipes);
       } catch (error) {
         console.error("Error fetching user likes:", error);
@@ -52,13 +43,12 @@ const FavoriteMenuList: React.FC = () => {
   const toggleLike = async (recipeId: string) => {
     const userId = user.id;
     try {
-      const response = await axios.post("http://localhost:5000/api/like", {
+      const response = await axios.post(import.meta.env.VITE_BASE_URL+"/api/like", {
         userId,
         targetId: recipeId,
         targetType: "Food",
       });
 
-      console.log('response', response.data)
       if (response.data.liked) {
         setLikedRecipes([...likedRecipes, recipeId]);
       } else {

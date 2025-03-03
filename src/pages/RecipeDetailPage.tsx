@@ -45,7 +45,7 @@ const RecipeDetailPage = () => {
     const handleSave = async (commentId: string) => {
         if (editText.trim() !== "") {
             try {
-                await axios.put(`http://localhost:5000/api/comment/${commentId}`, { text: editText });
+                await axios.put(import.meta.env.VITE_BASE_URL+`/api/comment/${commentId}`, { text: editText });
                 setComments((prev) =>
                     prev.map((comment) => (comment._id === commentId ? { ...comment, text: editText } : comment))
                 );
@@ -59,7 +59,7 @@ const RecipeDetailPage = () => {
     const handleDelete = async (commentId: string) => {
         if (window.confirm("คุณต้องการลบความคิดเห็นนี้ใช่หรือไม่?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/comment/${commentId}`);
+                await axios.delete(import.meta.env.VITE_BASE_URL+`/api/comment/${commentId}`);
                 setComments((prev) => prev.filter((comment) => comment._id !== commentId));
             } catch (error) {
                 console.error("Error deleting comment:", error);
@@ -68,7 +68,7 @@ const RecipeDetailPage = () => {
     };
     const getComments = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/comment/${id}`);
+            const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/comment/${id}`);
             setComments(response.data);
         } catch (error) {
             console.error("Error fetching comments:", error);
@@ -78,7 +78,7 @@ const RecipeDetailPage = () => {
     useEffect(() => {
         const getFoods = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/food/${id}`);
+                const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/food/${id}`);
                 setFoods(response.data);
                 setIngredients(response.data.ingredients)
                 setInstructions(response.data.instructions)
@@ -90,7 +90,7 @@ const RecipeDetailPage = () => {
         const getUserLikes = async () => {
             if (!user.id) return;
             try {
-                const response = await axios.get(`http://localhost:5000/api/like/${user.id}/`);
+                const response = await axios.get(import.meta.env.VITE_BASE_URL+`/api/like/${user.id}/`);
 
                 setLikedRecipes(response.data.likedRecipes);
             } catch (error) {
@@ -101,7 +101,7 @@ const RecipeDetailPage = () => {
         const getUserRating = async () => {
             if (!user.id) return;
             try {
-                const response = await axios.post(`http://localhost:5000/api/rating/get-rating`, {
+                const response = await axios.post(import.meta.env.VITE_BASE_URL+`/api/rating/get-rating`, {
                     foodId: id,
                     userId: user.id
                 });
@@ -125,7 +125,7 @@ const RecipeDetailPage = () => {
     useEffect(() => {
         const getAverageRating = async () => {
             try {
-                const response = await axios.post(`http://localhost:5000/api/rating/average-rating`, {
+                const response = await axios.post(import.meta.env.VITE_BASE_URL+`/api/rating/average-rating`, {
                     foodId: id,
                 });
                 setAverageRating(response.data)
@@ -145,7 +145,7 @@ const RecipeDetailPage = () => {
     const toggleLike = async (recipeId: string) => {
         const userId = user.id
         try {
-            const response = await axios.post("http://localhost:5000/api/like", {
+            const response = await axios.post(import.meta.env.VITE_BASE_URL+"/api/like", {
                 userId,
                 targetId: recipeId,
                 targetType: "Food"
@@ -165,7 +165,7 @@ const RecipeDetailPage = () => {
         setNewComment("");
         const userId = user.id;
         try {
-            await axios.post("http://localhost:5000/api/comment", {
+            await axios.post(import.meta.env.VITE_BASE_URL+"/api/comment", {
                 userId,
                 foodId: id,
                 text: newComment
@@ -180,7 +180,7 @@ const RecipeDetailPage = () => {
 
     const handleRatingChange = async (rating: number) => {
         try {
-            const response = await axios.post("http://localhost:5000/api/rating", {
+            const response = await axios.post(import.meta.env.VITE_BASE_URL+"/api/rating", {
                 foodId: foods._id,
                 userId: user.id,
                 rating,
