@@ -9,12 +9,12 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import storage from 'redux-persist/lib/storage';
 import userReducer from '../features/user/userSlice';
 
 const persistConfig = {
-  key: 'root', // The key to use in storage
-  storage, // The storage engine to use (localStorage in this case)
+  key: 'root',
+  storage,
 };
 
 const persistedReducer = persistReducer(persistConfig, userReducer);

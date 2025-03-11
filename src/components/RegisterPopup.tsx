@@ -4,7 +4,7 @@ import axios from "axios";
 interface RegisterPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: () => void; // Function to navigate to the Login page
+  onLogin: () => void;
 }
 
 const RegisterPopup: React.FC<RegisterPopupProps> = ({
@@ -20,7 +20,6 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
   });
   const [error, setError] = useState("");
 
-  // Destructure formData for easier access
   const { name, email, password, confirmPassword } = formData;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +43,7 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
 
     if (password !== confirmPassword) {
       setError("Password and Confirm Password must match.");
@@ -64,7 +63,6 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
         avatar_url,
       });
 
-      // Clear form fields
       setFormData({
         name: "",
         email: "",
@@ -82,7 +80,7 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-opacity-30 backdrop-blur-md">
+    <div className="fixed inset-0 flex items-center justify-center bg-opacity-30 backdrop-blur-md z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
         <button
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -99,7 +97,7 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
             </label>
             <input
               type="text"
-              name="name" // Added name for input
+              name="name"
               value={name}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"
@@ -111,7 +109,8 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
             </label>
             <input
               type="email"
-              name="email" // Added name for input
+              name="email"
+              autoComplete="new-email"
               value={email}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"
@@ -123,7 +122,8 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
             </label>
             <input
               type="password"
-              name="password" // Added name for input
+              name="password"
+              autoComplete="new-password"
               value={password}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"
@@ -135,7 +135,8 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
             </label>
             <input
               type="password"
-              name="confirmPassword" // Added name for input
+              name="confirmPassword"
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-400"

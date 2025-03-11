@@ -5,7 +5,7 @@ interface UserState {
   name: string;
   email: string;
   avatar_url: string;
-  isLoggedIn: boolean; // Add a isLoggedIn flag
+  isLoggedIn: boolean;
 }
 
 const initialState: UserState = {
@@ -13,7 +13,7 @@ const initialState: UserState = {
   name: '',
   email: '',
   avatar_url: '',
-  isLoggedIn: false, // Initially, the user is not logged in
+  isLoggedIn: false,
 };
 
 const userSlice = createSlice({
@@ -25,14 +25,14 @@ const userSlice = createSlice({
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.avatar_url = action.payload.avatar_url;
-      state.isLoggedIn = true; // Set isLoggedIn to true upon login
+      state.isLoggedIn = true;
     },
     clearUser: (state) => {
       state.id = null;
       state.name = '';
       state.email = '';
       state.avatar_url = '';
-      state.isLoggedIn = false; // Set isLoggedIn to false upon logout
+      state.isLoggedIn = false;
     },
   },
 });
