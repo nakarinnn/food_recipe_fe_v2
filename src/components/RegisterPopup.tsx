@@ -56,11 +56,13 @@ const RegisterPopup: React.FC<RegisterPopupProps> = ({
     )}&background=random&color=fff`;
 
     try {
-      await axios.post(`/api/user/register`, {
+      await axios.post(import.meta.env.VITE_USER_SERVICE_API + `/api/user/register`, {
         name,
         email,
         password,
         avatar_url,
+      }, {
+        withCredentials: true
       });
 
       setFormData({

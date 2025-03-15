@@ -23,7 +23,7 @@ const FavoriteMenuList: React.FC = () => {
     }
 
     try {
-      const response = await axios.get(`/api/like/favoriteMenu`,
+      const response = await axios.get(import.meta.env.VITE_LIKE_SERVICE_API + `/api/like/favoriteMenu`,
         {
           withCredentials: true
         }
@@ -45,7 +45,7 @@ const FavoriteMenuList: React.FC = () => {
         return;
       }
       try {
-        const response = await axios.get(`/api/like/`,
+        const response = await axios.get(import.meta.env.VITE_LIKE_SERVICE_API + `/api/like`,
           {
             withCredentials: true
           }
@@ -64,7 +64,7 @@ const FavoriteMenuList: React.FC = () => {
     const userId = user.id;
     if (!userId) return;
     try {
-      const response = await axios.post("/api/like", {
+      const response = await axios.post(import.meta.env.VITE_LIKE_SERVICE_API + "/api/like", {
         targetId: recipeId,
         targetType: "Food",
       }, {
@@ -126,25 +126,25 @@ const FavoriteMenuList: React.FC = () => {
                 <div className="space-y-4">
                   {favoriteMenus.map((menu: any) => (
                     <div
-                      key={menu.targetId._id}
+                      key={menu._id}
                       className="bg-orange-50 rounded-xl p-4 border border-orange-100 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row overflow-hidden"
                     >
-                      <Link to={`/recipe/${menu.targetId._id}`} className="block flex-shrink-0 sm:w-32 sm:h-32 h-48 w-full mb-4 sm:mb-0 sm:mr-4">
+                      <Link to={`/recipe/${menu._id}`} className="block flex-shrink-0 sm:w-32 sm:h-32 h-48 w-full mb-4 sm:mb-0 sm:mr-4">
                         <img
-                          src={menu.targetId.image}
-                          alt={menu.targetId.name}
+                          src={menu.image}
+                          alt={menu.name}
                           className="w-full h-full object-cover rounded-lg shadow-sm transition-transform duration-300 hover:scale-105"
                         />
                       </Link>
                       <div className="flex-grow flex flex-col">
                         <div className="flex-grow">
-                          <Link to={`/recipe/${menu.targetId._id}`} className="block">
+                          <Link to={`/recipe/${menu._id}`} className="block">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-orange-500 transition-colors">
-                              {menu.targetId.name}
+                              {menu.name}
                             </h3>
                             <p className="text-sm text-gray-600 overflow-hidden mb-3"
                               style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 }}>
-                              {menu.targetId.description}
+                              {menu.description}
                             </p>
                           </Link>
                         </div>
@@ -154,23 +154,23 @@ const FavoriteMenuList: React.FC = () => {
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 24 24" stroke="none">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                               </svg>
-                              <span>{typeof menu.targetId.avg === 'number' ? menu.targetId.avg.toFixed(1) : '0.0'}</span>
+                              <span>{typeof menu.avg === 'number' ? menu.avg.toFixed(1) : '0.0'}</span>
                             </div>
                             <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 border border-gray-200 flex items-center ml-2">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              <span>{menu.targetId.cookTime} นาที</span>
+                              <span>{menu.cookTime} นาที</span>
                             </div>
                           </div>
                           <button
-                            onClick={() => toggleLike(menu.targetId._id)}
-                            className={`p-3 rounded-full bg-white shadow-sm border border-orange-100 ${likedRecipes.includes(menu.targetId._id)
+                            onClick={() => toggleLike(menu._id)}
+                            className={`p-3 rounded-full bg-white shadow-sm border border-orange-100 ${likedRecipes.includes(menu._id)
                               ? "text-red-500"
                               : "text-gray-400 hover:text-red-500 hover:bg-red-50"
                               } transition-colors`}
                             aria-label={
-                              likedRecipes.includes(menu.targetId._id)
+                              likedRecipes.includes(menu._id)
                                 ? "นำออกจากรายการโปรด"
                                 : "เพิ่มในรายการโปรด"
                             }
@@ -179,7 +179,7 @@ const FavoriteMenuList: React.FC = () => {
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-5 w-5"
                               fill={
-                                likedRecipes.includes(menu.targetId._id)
+                                likedRecipes.includes(menu._id)
                                   ? "currentColor"
                                   : "none"
                               }

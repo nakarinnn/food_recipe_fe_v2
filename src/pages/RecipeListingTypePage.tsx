@@ -43,8 +43,8 @@ const RecipeListingPage = () => {
     const fetchData = async () => {
       try {
         const [foodsRes, likesRes] = await Promise.all([
-          axios.get(`/api/food/foodtype/${type}`),
-          user.id ? axios.get(`/api/like/`, {
+          axios.get(import.meta.env.VITE_FOOD_SERVICE_API + `/api/food/foodtype/${type}`),
+          user.id ? axios.get(import.meta.env.VITE_LIKE_SERVICE_API + `/api/like`, {
             withCredentials: true
           }) : Promise.resolve({ data: { likedRecipes: [] } }),
         ]);
@@ -75,11 +75,11 @@ const RecipeListingPage = () => {
       return;
     }
     try {
-      const response = await axios.post("/api/like", {
+      const response = await axios.post(import.meta.env.VITE_LIKE_SERVICE_API + "/api/like", {
         userId,
         targetId: recipeId,
         targetType: "Food",
-      });
+      }, { withCredentials: true });
 
       if (response.data.liked) {
         setLikedRecipes([...likedRecipes, recipeId]);

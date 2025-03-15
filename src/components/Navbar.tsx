@@ -27,7 +27,8 @@ const Navbar = () => {
           confirmButtonText: 'ตกลง',
         }).then((result) => {
           if (result.isConfirmed) {
-            handleLogout();
+            dispatch(clearUser());
+            setMobileMenuOpen(false);
           }
         });
       }
@@ -54,13 +55,14 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/user/logout', {
+      await axios.post(import.meta.env.VITE_USER_SERVICE_API + '/api/user/logout', {
         withCredentials: true
-      });
-      dispatch(clearUser());
-      setMobileMenuOpen(false);
+      })
     } catch (error) {
       console.error('Error during logout:', error);
+    } finally {
+      dispatch(clearUser());
+      setMobileMenuOpen(false);
     }
   };
 

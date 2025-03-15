@@ -23,7 +23,7 @@ const MyRecipePage = () => {
 
         const getFoods = async () => {
             try {
-                const response = await axios.get(`/api/food/getFoodByUserId`, {
+                const response = await axios.get(import.meta.env.VITE_FOOD_SERVICE_API + `/api/food/getFoodByUserId`, {
                     withCredentials: true,
                 });
                 setFoods(response.data);
@@ -50,7 +50,7 @@ const MyRecipePage = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`/api/food/${recipeId}`, {
+                    await axios.delete(import.meta.env.VITE_FOOD_SERVICE_API + `/api/food/${recipeId}`, {
                         withCredentials: true
                     });
                     setFoods((prev: any[]) => prev.filter((recipe) => recipe._id !== recipeId));

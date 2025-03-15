@@ -10,7 +10,6 @@ import Loading from '../components/Loading';
 import Footer from '../components/footer';
 import LoginPopup from '../components/LoginPopup';
 import RegisterPopup from '../components/RegisterPopup';
-import RecipeListingTypePage from './RecipeListingTypePage';
 import NotFoundPage from './NotFoundPage';
 
 interface Ingredient {
@@ -61,7 +60,9 @@ const RecipeDetailPage = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.put(`/api/comment/${commentId}`, { text: result.value });
+                    await axios.put(import.meta.env.VITE_COMMENT_SERVICE_API + `/api/comment/${commentId}`, { text: result.value }, {
+                        withCredentials: true
+                    });
                     setComments((prev) =>
                         prev.map((comment) => (comment._id === commentId ? { ...comment, text: result.value } : comment))
                     );
@@ -88,7 +89,9 @@ const RecipeDetailPage = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`/api/comment/${commentId}`);
+                    await axios.delete(import.meta.env.VITE_COMMENT_SERVICE_API + `/api/comment/${commentId}`, {
+                        withCredentials: true
+                    });
                     setComments((prev) => prev.filter((comment) => comment._id !== commentId));
                     Swal.fire("ลบสำเร็จ!", "คอมเมนต์ของคุณถูกลบแล้ว", "success");
                 } catch (error) {
@@ -101,7 +104,9 @@ const RecipeDetailPage = () => {
 
     const getComments = async () => {
         try {
-            const response = await axios.get(`/api/comment/${id}`);
+            const response = await axios.get(import.meta.env.VITE_COMMENT_SERVICE_API + `/api/comment/${id}`, {
+                withCredentials: true
+            });
             setComments(response.data);
         } catch (error) {
             console.error("Error fetching comments:", error);
@@ -111,14 +116,16 @@ const RecipeDetailPage = () => {
     useEffect(() => {
         const getFoods = async () => {
             try {
-                const response = await axios.get(`/api/food/${id}`);
-                if (!response.data) {
+                const response = await axios.get(import.meta.env.VITE_FOOD_SERVICE_API + `/api/food/${id}`, {
+                    withCredentials: true
+                });
+                if (!response.data || response.data.length === 0 || !response.data[0]) {
                     setNotFound(true);
                 } else {
-                    setFoods(response.data);
-                    setIngredients(response.data.ingredients || []);
-                    setInstructions(response.data.instructions || []);
-                    setOwner(response.data.owner || null);
+                    setFoods(response.data[0]);
+                    setIngredients(response.data[0].ingredients || []);
+                    setInstructions(response.data[0].instructions || []);
+                    setOwner(response.data[0].ownerDetails || null);
                 }
             } catch (error: any) {
                 console.error("Error fetching random foods:", error)
@@ -133,7 +140,7 @@ const RecipeDetailPage = () => {
         const getUserLikes = async () => {
             if (!user.id) return;
             try {
-                const response = await axios.get(`/api/like/`,
+                const response = await axios.get(import.meta.env.VITE_LIKE_SERVICE_API + `/api/like/`,
                     {
                         withCredentials: true
                     }
@@ -147,7 +154,7 @@ const RecipeDetailPage = () => {
         const getUserRating = async () => {
             if (!user.id) return;
             try {
-                const response = await axios.post(`/api/rating/get-rating`, {
+                const response = await axios.post(import.meta.env.VITE_RATING_SERVICE_API + `/api/rating/get-rating`, {
                     foodId: id,
                 }, {
                     withCredentials: true
@@ -172,8 +179,10 @@ const RecipeDetailPage = () => {
     useEffect(() => {
         const getAverageRating = async () => {
             try {
-                const response = await axios.post(`/api/rating/average-rating`, {
+                const response = await axios.post(import.meta.env.VITE_RATING_SERVICE_API + `/api/rating/average-rating`, {
                     foodId: id,
+                }, {
+                    withCredentials: true
                 });
                 setAverageRating(response.data)
             } catch (error) {
@@ -196,7 +205,7 @@ const RecipeDetailPage = () => {
             return;
         }
         try {
-            const response = await axios.post("/api/like", {
+            const response = await axios.post(import.meta.env.VITE_LIKE_SERVICE_API + "/api/like", {
                 targetId: recipeId,
                 targetType: "Food"
             }, {
@@ -220,7 +229,7 @@ const RecipeDetailPage = () => {
             return;
         }
         try {
-            await axios.post("/api/comment", {
+            await axios.post(import.meta.env.VITE_COMMENT_SERVICE_API + "/api/comment", {
                 foodId: id,
                 text: newComment
             }, {
@@ -242,13 +251,14 @@ const RecipeDetailPage = () => {
             return;
         }
         try {
-            const response = await axios.post("/api/rating", {
+            const response = await axios.post(import.meta.env.VITE_RATING_SERVICE_API + "/api/rating", {
                 foodId: foods._id,
                 rating,
             }, {
                 withCredentials: true
             });
 
+            console.log(response.data)
             setUserRating(response.data.newRating.rating)
             getComments();
 
@@ -460,13 +470,13 @@ const RecipeDetailPage = () => {
                                         <div key={comment._id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all">
                                             <div className="flex items-start gap-4">
                                                 <img
-                                                    src={comment.userId.avatar_url}
-                                                    alt={comment.userId.name}
+                                                    src={comment.userDetails.avatar_url}
+                                                    alt={comment.userDetails.name}
                                                     className="w-12 h-12 rounded-full border border-orange-200 shadow-sm"
                                                 />
                                                 <div className="flex-1">
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                                                        <p className="font-medium text-gray-800">{comment.userId.name}</p>
+                                                        <p className="font-medium text-gray-800">{comment.userDetails.name}</p>
                                                         {/* <span className="text-sm text-gray-500 break-words whitespace-normal max-w-[120px]">
                                                             {comment.userId.email}
                                                         </span> */}
@@ -474,7 +484,7 @@ const RecipeDetailPage = () => {
                                                     <span className="text-sm text-gray-400 mt-2 sm:mt-0 whitespace-nowrap">
                                                         {new Date(comment.createdAt).toLocaleString()}
                                                     </span>
-                                                    {user.id === comment.userId._id ? (
+                                                    {user.id === comment.userDetails._id ? (
                                                         <>
                                                             <p className="text-gray-700 mt-1 text-base">{comment.text}</p>
                                                             <div className="flex justify-end gap-2 mt-2">

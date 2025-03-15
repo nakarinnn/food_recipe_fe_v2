@@ -138,7 +138,7 @@ export default function RecipeForm() {
             owner: user.id ? String(user.id) : "",
           };
 
-          await axios.post("/api/food/add-recipe", { formData: newFormData }, { withCredentials: true });
+          await axios.post(import.meta.env.VITE_FOOD_SERVICE_API + "/api/food/add-recipe", { formData: newFormData }, { withCredentials: true });
 
           setFormData({
             name: "",

@@ -53,8 +53,8 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const [foodsRes, likesRes] = await Promise.all([
-          axios.get("/api/food/food-random"),
-          user.id ? axios.get(`/api/like/`, {
+          axios.get(import.meta.env.VITE_FOOD_SERVICE_API + "/api/food/food-random"),
+          user.id ? axios.get(import.meta.env.VITE_LIKE_SERVICE_API + `/api/like`, {
             withCredentials: true
           }) : Promise.resolve({ data: { likedRecipes: [] } }),
         ]);
@@ -77,7 +77,7 @@ const HomePage = () => {
       return;
     }
     try {
-      const response = await axios.post("/api/like", {
+      const response = await axios.post(import.meta.env.VITE_LIKE_SERVICE_API + "/api/like", {
         targetId: recipeId,
         targetType: "Food"
       }, {

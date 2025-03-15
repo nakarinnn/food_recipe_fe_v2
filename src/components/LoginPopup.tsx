@@ -26,10 +26,10 @@ const LoginPopup: React.FC<LoginPopupProps> = ({ isOpen, onClose, onRegister }) 
         e.preventDefault();
 
         try {
-            const response = await axios.post("/api/user/login", {
+            const response = await axios.post(import.meta.env.VITE_USER_SERVICE_API + "/api/user/login", {
                 email,
                 password,
-            });
+            },{ withCredentials: true });
 
             dispatch(
                 setUser({
